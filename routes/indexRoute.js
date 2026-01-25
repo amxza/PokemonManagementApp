@@ -1,9 +1,8 @@
 const {Router} = require("express");
 const indexRoute = Router();
+const control = require("../controllers/controls");
 
-indexRoute.get("/", (req, res) => {
-    res.send("Hello Guyd HOw do you do");
-});
+indexRoute.get("/", control.getAll);
 
 indexRoute.get("/new", (req, res) => {
     res.send("CURRY > LEBRON, KD, MJ");
