@@ -3,9 +3,7 @@ const indexRoute = Router();
 const control = require("../controllers/controls");
 
 indexRoute.get("/", control.getAll);
-
-indexRoute.get("/new", (req, res) => {
-    res.send("CURRY > LEBRON, KD, MJ");
-});
+indexRoute.get("/new", control.newTrainer);
+indexRoute.post("/new", control.getNewTrainer);
 
 module.exports = indexRoute;

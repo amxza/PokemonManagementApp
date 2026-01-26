@@ -8,6 +8,13 @@
 <body>
     <%- include('navbar') %>
     <h2>Displays all the Trainers Here...</h2>
-    <p>Ash, Misty, Brock, Gary</p>
+    <ul>
+        <% trainers.forEach(trainer => { %> 
+        <li>
+            <%= trainer.trainerName %>
+        </li>
+        <% }); %>
+    </ul>
+
 </body>
 </html>
