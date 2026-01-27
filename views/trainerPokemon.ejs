@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Trainer's Pokemon</h2>
+    <ul>
+        <% if (tPokemon.pokemon.length > 0) { %>
+        <% tPokemon.pokemon.forEach(poke => { %>
+            <li><%= poke.name %> </li>
+            <% }) %>
+        <% } else { %>
+            <li>No Pokemon Added yet</li>
+        <% } %>
+    </ul>
+    <button><a href="/">Back to All Trainers</a></button>
+</body>
+</html>

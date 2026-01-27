@@ -11,7 +11,9 @@
     <ul>
         <% trainers.forEach(trainer => { %> 
         <li>
-            <%= trainer.trainerName %>
+            <a href="/trainer/<%= trainer.id %>">
+                <%= trainer.trainerName %>
+            </a>
         </li>
         <% }); %>
     </ul>
