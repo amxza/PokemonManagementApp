@@ -10,12 +10,13 @@
     <ul>
         <% if (tPokemon.pokemon.length > 0) { %>
         <% tPokemon.pokemon.forEach(poke => { %>
-            <li><%= poke.name %> </li>
+            <li><a href="/trainer/<%= tPokemon.id %>/pokemon/<%= poke.id %>"><%= poke.name %></a> </li>
             <% }) %>
         <% } else { %>
             <li>No Pokemon Added yet</li>
         <% } %>
     </ul>
     <button><a href="/">Back to All Trainers</a></button>
+    <button><a href="/trainer/<%=tPokemon.id%>/newpokemon">Add a Pokemon</a></button>
 </body>
 </html>
