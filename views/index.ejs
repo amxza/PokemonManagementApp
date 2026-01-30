@@ -9,10 +9,10 @@
     <%- include('navbar') %>
     <h2>Displays all the Trainers Here...</h2>
     <ul>
-        <% trainers.forEach(trainer => { %> 
+        <% trainee.forEach(trainer => { %> 
         <li>
             <a href="/trainer/<%= trainer.id %>">
-                <%= trainer.trainerName %>
+                <%= trainer.trainer_name %>
             </a>
         </li>
         <% }); %>

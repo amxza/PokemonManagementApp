@@ -1,4 +1,6 @@
+const pool = require("../db/pool");
 const db = require("../db/queries");
+
 const trainers = [
     {
         trainerName: "Ash",
@@ -29,7 +31,7 @@ const trainers = [
 async function getAllTrainers(req, res) {
     const trainee = await db.getTrainers();
     console.log("Trainers: ", trainee);
-    res.render("index", {title: "MainPage", trainers: trainers});
+    res.render("index", {title: "MainPage", trainee: trainee});
 }
 
 async function newTrainer(req, res) {
@@ -37,63 +39,112 @@ async function newTrainer(req, res) {
 }
 
 async function getNewTrainer(req, res) {
-    const newTrainer = req.body.newTrainer;
+    const { newTrainer } = req.body;
+    // The query now returns the new row, so console.log won't be undefined
     const newTrainee = await db.addTrainer(newTrainer);
-    console.log("New Trainer: ", newTrainee);
-    trainers.push({trainerName: newTrainer, id: trainers.length + 1, pokemon: []});
+    console.log("New Trainer Added: ", newTrainee);
     res.redirect("/");
 }
+
 async function viewTrainerPokemon(req, res) {
     const trainerID = req.params.id;
+    
+    try {
+        // 1. Get the list of Pokémon for this trainer from DB
+        const pokemonList = await db.viewTrainersPokemon(trainerID);
 
-    const tPokemon = trainers.find(p => String(p.id) === trainerID);
+        // 2. Get the trainer's name specifically to show in the header
+        const trainerResult = await pool.query(
+            "SELECT trainer_name FROM trainers WHERE id = $1", 
+            [trainerID]
+        );
+        
+        if (trainerResult.rows.length === 0) {
+            return res.status(404).send("Trainer Not Found");
+        }
 
-    if (!tPokemon) {
-        return res.status(404).send("Player Not Found...");
+        const trainerName = trainerResult.rows[0].trainer_name;
+
+        // 3. Pass both to the view
+        res.render("trainerPokemon", {
+            trainerName: trainerName,
+            pokemonList: pokemonList,
+            trainerID: trainerID // Needed for the "Add Pokemon" link
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
     }
-
-    res.render("trainerPokemon", {tPokemon: tPokemon});
 };
 
 async function addPokemon(req, res) {
-    const newPoke = trainers.find(p => String(p.id) === req.params.id);
+    const trainerID = req.params.id;
+    // We need the trainer's name/ID for the form's display and action
+    const trainerResult = await pool.query("SELECT * FROM trainers WHERE id = $1", [trainerID]);
+    const trainer = trainerResult.rows[0];
 
-    res.render("newPokemon", {newPoke: newPoke})
+    // Pass the trainer as 'newPoke' to match your newPokemon.ejs variable name
+    res.render("newPokemon", { newPoke: trainer });
 }
 
 async function getAddPokemon(req, res) {
     const trainerID = req.params.id;
-    const {name, type, description} = req.body;
+    const { name, type, description } = req.body;
 
-    const newPoke = trainers.find(p => String(p.id) === trainerID);
-
-    if(newPoke) {
-        newPoke.pokemon.push({
-            id: Date.now(),
-            name: name,
-            type: type,
-            description: description,
-        });
+    try {
+        await db.insertPokemon(trainerID, name, type, description);
         res.redirect(`/trainer/${trainerID}`);
-    } else {
-        res.status(404).send("Pokemon not found");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error saving Pokemon");
     }
-};
+}
 
 async function getPokemonDetails(req, res) {
-    const {id, pokeId} = req.params;
+    const { id, pokeId } = req.params;
 
-    const trainer = trainers.find(t => String(t.id) === id);
-    if (!trainer) return res.status(404).send("Trainer Not Found");
+    try {
+        const trainerResult = await pool.query("SELECT * FROM trainers WHERE id = $1", [id]);
+        const pokemon = await db.getPokemonById(pokeId);
 
-    const pokemon = trainer.pokemon.find(p => String(p.id) === pokeId);
-    if(!pokemon) return res.status(404).send("Pokemon not found");
+        if (!trainerResult.rows[0] || !pokemon) {
+            return res.status(404).send("Details not found");
+        }
 
-    res.render("pokemonDetails", {trainer, pokemon})
+        res.render("pokemonDetails", { 
+            trainer: trainerResult.rows[0], 
+            pokemon: pokemon 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 }
 
 async function getAllPokemon(req, res) {
-    res.render("allPokemon", {trainers: trainers});
+    try {
+        // Use a JOIN to get every pokemon and their trainer's name in one list
+        const { rows } = await pool.query(`
+            SELECT pokemon.*, trainers.trainer_name 
+            FROM pokemon 
+            JOIN trainers ON pokemon.trainer_id = trainers.id
+        `);
+        res.render("allPokemon", { allPokemon: rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error fetching all pokemon");
+    }
+}
+
+async function removeTrainer(req, res) {
+    const trainerID = req.params.id;
+    try {
+        await db.deleteTrainer(trainerID);
+        res.redirect("/"); // Go back to the main list after deletion
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting trainer");
+    }
 }
 
 
@@ -107,5 +158,6 @@ module.exports = {
     getAddPokemon,
     getPokemonDetails,
     getAllPokemon,
+    removeTrainer
 }
 

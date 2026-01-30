@@ -10,4 +10,5 @@ indexRoute.get("/trainer/:id/newpokemon", control.addPokemon);
 indexRoute.post("/trainer/:id/newpokemon", control.getAddPokemon);
 indexRoute.get("/trainer/:id/pokemon/:pokeId", control.getPokemonDetails);
 indexRoute.get("/allpokemon", control.getAllPokemon);
+indexRoute.post("/trainer/:id/delete", control.removeTrainer);
 module.exports = indexRoute;

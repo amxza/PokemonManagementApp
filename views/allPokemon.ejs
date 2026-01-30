@@ -7,14 +7,13 @@
 </head>
 <body>
     <ul>
-        <% trainers.forEach(trainer => { %>
-            <% trainer.pokemon.forEach(poke => { %>
-                <li><%= poke.name %></li>
-
-            <% }) %>
-
-        <% }) %>
-    </ul>
+  <% allPokemon.forEach(poke => { %>
+    <li>
+      <strong><%= poke.name %></strong> 
+      (Trainer: <%= poke.trainer_name %>)
+    </li>
+  <% }) %>
+</ul>
     <button><a href="/">Back Home</a></button>
 </body>
 </html>
