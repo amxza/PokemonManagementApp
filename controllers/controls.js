@@ -1,4 +1,4 @@
-
+const db = require("../db/queries");
 const trainers = [
     {
         trainerName: "Ash",
@@ -27,6 +27,8 @@ const trainers = [
 ];
 
 async function getAllTrainers(req, res) {
+    const trainee = await db.getTrainers();
+    console.log("Trainers: ", trainee);
     res.render("index", {title: "MainPage", trainers: trainers});
 }
 
@@ -35,7 +37,9 @@ async function newTrainer(req, res) {
 }
 
 async function getNewTrainer(req, res) {
-    const newTrainer = req.body.newTrainer
+    const newTrainer = req.body.newTrainer;
+    const newTrainee = await db.addTrainer(newTrainer);
+    console.log("New Trainer: ", newTrainee);
     trainers.push({trainerName: newTrainer, id: trainers.length + 1, pokemon: []});
     res.redirect("/");
 }
